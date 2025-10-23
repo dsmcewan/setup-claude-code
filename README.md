@@ -2,6 +2,8 @@
 
 [![Test](https://github.com/pleaseai/setup-claude-code/actions/workflows/test.yml/badge.svg)](https://github.com/pleaseai/setup-claude-code/actions/workflows/test.yml)
 [![Integration Test](https://github.com/pleaseai/setup-claude-code/actions/workflows/integration.yml/badge.svg)](https://github.com/pleaseai/setup-claude-code/actions/workflows/integration.yml)
+[![codecov](https://codecov.io/gh/pleaseai/setup-claude-code/graph/badge.svg?token=UDgUvPCl4k)](https://codecov.io/gh/pleaseai/setup-claude-code)
+[![code style](https://antfu.me/badge-code-style.svg)](https://github.com/antfu/eslint-config)
 
 Install [Claude Code CLI](https://claude.ai/code) in your GitHub Actions workflows with built-in caching support.
 
