@@ -6,7 +6,7 @@ branding:
 
 inputs:
   version:
-    description: 'Claude Code version to install (e.g., "2.0.19" or "latest")'
+    description: 'Claude Code version to install. Options: "stable" (recommended), "latest", or specific version number (e.g., "2.0.25")'
     required: false
     default: latest
 

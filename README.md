@@ -1,7 +1,7 @@
 # Setup Claude Code
 
-[![Test](https://github.com/amondnet/setup-claude-code/actions/workflows/test.yml/badge.svg)](https://github.com/amondnet/setup-claude-code/actions/workflows/test.yml)
-[![Integration Test](https://github.com/amondnet/setup-claude-code/actions/workflows/integration.yml/badge.svg)](https://github.com/amondnet/setup-claude-code/actions/workflows/integration.yml)
+[![Test](https://github.com/pleaseai/setup-claude-code/actions/workflows/test.yml/badge.svg)](https://github.com/pleaseai/setup-claude-code/actions/workflows/test.yml)
+[![Integration Test](https://github.com/pleaseai/setup-claude-code/actions/workflows/integration.yml/badge.svg)](https://github.com/pleaseai/setup-claude-code/actions/workflows/integration.yml)
 
 Install [Claude Code CLI](https://claude.ai/code) in your GitHub Actions workflows with built-in caching support.
 
@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: amondnet/setup-claude-code@v1
+      - uses: pleaseai/setup-claude-code@v1
         with:
           version: latest
 
@@ -37,15 +37,23 @@ jobs:
 ### With Specific Version
 
 ```yaml
-- uses: amondnet/setup-claude-code@v1
+- uses: pleaseai/setup-claude-code@v1
   with:
-    version: 2.0.19
+    version: 2.0.25  # Install specific version number
+```
+
+### With Stable Version
+
+```yaml
+- uses: pleaseai/setup-claude-code@v1
+  with:
+    version: stable  # Install stable version (recommended for production)
 ```
 
 ### Using Outputs
 
 ```yaml
-- uses: amondnet/setup-claude-code@v1
+- uses: pleaseai/setup-claude-code@v1
   id: setup-claude
   with:
     version: latest
@@ -60,7 +68,7 @@ jobs:
 
 | Input | Description | Required | Default |
 |-------|-------------|----------|---------|
-| `version` | Claude Code version to install (e.g., `2.0.19` or `latest`) | No | `latest` |
+| `version` | Claude Code version to install. Options: `stable` (recommended), `latest`, or specific version number (e.g., `2.0.25`) | No | `latest` |
 
 ## Outputs
 

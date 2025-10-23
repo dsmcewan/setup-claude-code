@@ -8,27 +8,28 @@ on:
 
 jobs:
   test-action:
-    name: Test action on ${{ matrix.os }}
+    name: Test ${{ matrix.version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
+        version: [stable, latest, '2.0.25']
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Test action with latest version
+      - name: Test action with ${{ matrix.version }} version
         uses: ./
-        id: setup-latest
+        id: setup-claude
         with:
-          version: latest
+          version: ${{ matrix.version }}
 
       - name: Verify installation
         run: |
-          echo "Cache hit: ${{ steps.setup-latest.outputs.cache-hit }}"
-          echo "Version: ${{ steps.setup-latest.outputs.version }}"
-          echo "Path: ${{ steps.setup-latest.outputs.claude-path }}"
+          echo "Cache hit: ${{ steps.setup-claude.outputs.cache-hit }}"
+          echo "Version: ${{ steps.setup-claude.outputs.version }}"
+          echo "Path: ${{ steps.setup-claude.outputs.claude-path }}"
 
           # Verify claude command works
           if ! command -v claude &> /dev/null; then
@@ -37,4 +38,4 @@ jobs:
           fi
 
           claude --version
-          echo "✅ Claude Code is working!"
+          echo "✅ Claude Code ${{ matrix.version }} is working!"
