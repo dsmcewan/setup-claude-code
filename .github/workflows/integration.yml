@@ -36,6 +36,8 @@ jobs:
           echo "Cache hit: ${{ steps.setup-claude.outputs.cache-hit }}"
           echo "Version: ${{ steps.setup-claude.outputs.version }}"
           echo "Path: ${{ steps.setup-claude.outputs.claude-path }}"
+          echo "Marketplaces added: ${{ steps.setup-claude.outputs.marketplaces_added }}"
+          echo "Plugins installed: ${{ steps.setup-claude.outputs.plugins_installed }}"
 
           # Verify claude command works
           if ! command -v claude &> /dev/null; then
@@ -45,3 +47,13 @@ jobs:
 
           claude --version
           echo "✅ Claude Code ${{ matrix.version }} is working!"
+
+          # Verify marketplaces are installed
+          echo ""
+          echo "Checking marketplaces..."
+          claude plugin marketplace list
+
+          # Verify plugins are installed
+          echo ""
+          echo "Checking plugins..."
+          claude plugin list
