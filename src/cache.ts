@@ -15,10 +15,10 @@ export function getCacheKey(version: string): string {
 
   if (version === 'latest') {
     const date = getCurrentDate()
-    return `claude-code-v2-${platform}-latest-${date}`
+    return `claude-code-${platform}-latest-${date}`
   }
   else {
-    return `claude-code-v2-${platform}-${version}`
+    return `claude-code-${platform}-${version}`
   }
 }
 
@@ -29,8 +29,8 @@ export function getRestoreKeys(version: string): string[] {
   const platform = os.platform()
 
   return [
-    `claude-code-v2-${platform}-${version}-`,
-    `claude-code-v2-${platform}-`,
+    `claude-code-${platform}-${version}-`,
+    `claude-code-${platform}-`,
   ]
 }
 
