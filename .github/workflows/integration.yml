@@ -52,8 +52,3 @@ jobs:
           echo ""
           echo "Checking marketplaces..."
           claude plugin marketplace list
-
-          # Verify plugins are installed
-          echo ""
-          echo "Checking plugins..."
-          claude plugin list
