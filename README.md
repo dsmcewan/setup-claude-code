@@ -168,7 +168,7 @@ Cache keys follow the pattern:
 - ✅ Linux (x64, arm64)
 - ✅ Linux with musl (x64, arm64) - Alpine, etc.
 - ✅ macOS (x64, arm64)
-- ❌ Windows (not supported by Claude Code CLI)
+- ⏳ Windows (x64) - Planned (see [#3](https://github.com/pleaseai/setup-claude-code/issues/3))
 
 ## Development
 
