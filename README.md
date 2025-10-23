@@ -78,6 +78,18 @@ jobs:
     plugins: dev-tools@passionfactory,pr-review-toolkit@passionfactory
 ```
 
+#### Private Repositories
+
+The action automatically uses `${{ github.token }}` for git authentication. For private repositories with custom access requirements, you can provide a Personal Access Token (PAT):
+
+```yaml
+- uses: pleaseai/setup-claude-code@v1
+  with:
+    github_token: ${{ secrets.MY_PAT }} # Optional: only needed for custom access
+    marketplaces: your-org/private-plugins
+    plugins: private-plugin@your-org
+```
+
 #### Multiple Marketplaces with Multiline Format
 
 ```yaml
@@ -126,6 +138,7 @@ Example with marketplace and plugins together:
 | Input | Description | Required | Default |
 |-------|-------------|----------|---------|
 | `version` | Claude Code version to install. Options: `stable` (recommended), `latest`, or specific version number (e.g., `2.0.25`) | No | `latest` |
+| `github_token` | GitHub token for accessing plugin repositories. Automatically defaults to `${{ github.token }}`. Provide a custom PAT only if you need special access permissions. | No | `${{ github.token }}` |
 | `marketplaces` | Plugin marketplace sources. Supports: GitHub (`owner/repo`), Git URL, local path, or remote URL. Can be comma-separated or newline-separated (with `\|`) for multiple marketplaces. **Required if installing plugins.** | No | - |
 | `plugins` | List of plugins to install. Can be comma-separated or newline-separated (with `\|`). **Requires `marketplaces` to be specified.** | No | - |
 

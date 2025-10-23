@@ -9,6 +9,10 @@ inputs:
     description: 'Claude Code version to install. Options: "stable" (recommended), "latest", or specific version number (e.g., "2.0.25")'
     required: false
     default: latest
+  github_token:
+    description: 'GitHub token for accessing plugin repositories. Used to configure git credentials and convert SSH URLs to HTTPS. The token is configured with the local git config. For private repositories, ensure the token has appropriate access. Learn more about creating and using encrypted secrets: https://docs.github.com/en/actions/security-guides/encrypted-secrets'
+    required: false
+    default: ${{ github.token }}
   marketplaces:
     description: 'Plugin marketplace sources to add. Supports: GitHub (owner/repo), Git URL, local path, or remote URL. Can be comma-separated or newline-separated for multiple marketplaces. Required if installing plugins.'
     required: false

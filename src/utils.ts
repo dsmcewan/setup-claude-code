@@ -146,3 +146,42 @@ export function getCurrentDate(): string {
   const now = new Date()
   return now.toISOString().split('T')[0]
 }
+
+/**
+ * Setup Git credentials for accessing private repositories
+ * Configures git credential helper and URL rewriting for GitHub
+ */
+export async function setupGitCredentials(token: string): Promise<void> {
+  core.info('🔐 Configuring Git credentials for private repositories')
+
+  // Mark token as secret to prevent it from being logged
+  core.setSecret(token)
+
+  const homeDir = getHomeDir()
+  const credentialsPath = path.join(homeDir, '.git-credentials')
+
+  try {
+    // Ensure home directory exists
+    if (!fs.existsSync(homeDir)) {
+      fs.mkdirSync(homeDir, { recursive: true })
+    }
+
+    // Write credentials file
+    const credentialsContent = `https://x-access-token:${token}@github.com\n`
+    fs.writeFileSync(credentialsPath, credentialsContent, { mode: 0o600 })
+
+    // Configure git credential helper
+    await exec.exec('git', ['config', '--global', 'credential.helper', 'store'])
+    core.info('  ✅ Git credential helper configured')
+
+    // Force SSH URLs to HTTPS to use git credentials
+    await exec.exec('git', ['config', '--global', 'url.https://github.com/.insteadOf', 'git@github.com:'])
+    await exec.exec('git', ['config', '--global', 'url.https://.insteadOf', 'ssh://'])
+    core.info('  ✅ SSH → HTTPS URL rewrite configured')
+
+    core.info('✅ Git credentials configured successfully')
+  }
+  catch (error) {
+    throw new Error(`Failed to setup Git credentials: ${error}`)
+  }
+}

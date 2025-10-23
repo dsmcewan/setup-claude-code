@@ -34,3 +34,8 @@ export declare function verifyInstallation(): Promise<{
  * Get the current date in YYYY-MM-DD format
  */
 export declare function getCurrentDate(): string;
+/**
+ * Setup Git credentials for accessing private repositories
+ * Configures git credential helper and URL rewriting for GitHub
+ */
+export declare function setupGitCredentials(token: string): Promise<void>;

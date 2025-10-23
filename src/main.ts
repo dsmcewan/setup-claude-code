@@ -2,12 +2,13 @@ import * as core from '@actions/core'
 import { restoreCache, saveCache } from './cache'
 import { installClaudeCode } from './installer'
 import { addOrUpdateMarketplaces, installPlugins } from './plugins'
-import { addToPath, getClaudePaths, verifyInstallation } from './utils'
+import { addToPath, getClaudePaths, setupGitCredentials, verifyInstallation } from './utils'
 
 async function run(): Promise<void> {
   try {
     // Get inputs
     const version = core.getInput('version') || 'latest'
+    const githubToken = core.getInput('github_token')
     const marketplacesInput = core.getInput('marketplaces')
     const pluginList = core.getInput('plugins')
 
@@ -40,6 +41,13 @@ async function run(): Promise<void> {
     core.setOutput('claude-path', claudePath)
 
     core.info('✅ Claude Code setup completed successfully!')
+
+    // Setup Git credentials for plugin installation (converts SSH to HTTPS)
+    // This is needed even for public repositories to avoid SSH authentication issues
+    if ((marketplacesInput || pluginList) && githubToken) {
+      core.info('')
+      await setupGitCredentials(githubToken)
+    }
 
     // Handle plugin marketplace and installation
     if (marketplacesInput) {

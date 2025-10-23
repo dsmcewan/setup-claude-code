@@ -77550,6 +77550,37 @@ function getCurrentDate() {
     const now = new Date();
     return now.toISOString().split('T')[0];
 }
+/**
+ * Setup Git credentials for accessing private repositories
+ * Configures git credential helper and URL rewriting for GitHub
+ */
+async function setupGitCredentials(token) {
+    core.info('🔐 Configuring Git credentials for private repositories');
+    // Mark token as secret to prevent it from being logged
+    core.setSecret(token);
+    const homeDir = getHomeDir();
+    const credentialsPath = external_node_path_namespaceObject.join(homeDir, '.git-credentials');
+    try {
+        // Ensure home directory exists
+        if (!external_node_fs_.existsSync(homeDir)) {
+            external_node_fs_.mkdirSync(homeDir, { recursive: true });
+        }
+        // Write credentials file
+        const credentialsContent = `https://x-access-token:${token}@github.com\n`;
+        external_node_fs_.writeFileSync(credentialsPath, credentialsContent, { mode: 0o600 });
+        // Configure git credential helper
+        await exec.exec('git', ['config', '--global', 'credential.helper', 'store']);
+        core.info('  ✅ Git credential helper configured');
+        // Force SSH URLs to HTTPS to use git credentials
+        await exec.exec('git', ['config', '--global', 'url.https://github.com/.insteadOf', 'git@github.com:']);
+        await exec.exec('git', ['config', '--global', 'url.https://.insteadOf', 'ssh://']);
+        core.info('  ✅ SSH → HTTPS URL rewrite configured');
+        core.info('✅ Git credentials configured successfully');
+    }
+    catch (error) {
+        throw new Error(`Failed to setup Git credentials: ${error}`);
+    }
+}
 
 ;// CONCATENATED MODULE: ./src/cache.ts
 
@@ -77904,6 +77935,7 @@ async function run() {
     try {
         // Get inputs
         const version = core.getInput('version') || 'latest';
+        const githubToken = core.getInput('github_token');
         const marketplacesInput = core.getInput('marketplaces');
         const pluginList = core.getInput('plugins');
         core.info(`Setting up Claude Code version: ${version}`);
@@ -77928,6 +77960,12 @@ async function run() {
         core.setOutput('version', installedVersion);
         core.setOutput('claude-path', claudePath);
         core.info('✅ Claude Code setup completed successfully!');
+        // Setup Git credentials for plugin installation (converts SSH to HTTPS)
+        // This is needed even for public repositories to avoid SSH authentication issues
+        if ((marketplacesInput || pluginList) && githubToken) {
+            core.info('');
+            await setupGitCredentials(githubToken);
+        }
         // Handle plugin marketplace and installation
         if (marketplacesInput) {
             core.info('');

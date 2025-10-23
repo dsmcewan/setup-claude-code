@@ -24,7 +24,7 @@ jobs:
         id: setup-claude
         with:
           version: ${{ matrix.version }}
-          marketplaces: | 
+          marketplaces: |
             anthropics/claude-code
             https://github.com/pleaseai/claude-code-plugins.git
           plugins: |
