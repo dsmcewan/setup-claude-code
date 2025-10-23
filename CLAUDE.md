@@ -24,11 +24,13 @@ src/
 ├── main.ts       # Entry point - orchestrates the workflow
 ├── installer.ts  # Installation logic (download, verify, install)
 ├── cache.ts      # Cache key generation and restore/save
+├── plugins.ts    # Plugin marketplace and installation logic
 └── utils.ts      # Platform detection, PATH management, verification
 
 test/
 ├── utils.test.ts
 ├── cache.test.ts
+├── plugins.test.ts
 └── integration.test.ts (planned)
 
 .github/workflows/
@@ -40,11 +42,15 @@ test/
 
 **Inputs:**
 - `version`: Claude Code version to install (default: "latest")
+- `marketplaces`: Plugin marketplace sources (optional) - supports GitHub (owner/repo), Git URL, local path, or remote URL. Can be comma-separated or newline-separated for multiple marketplaces
+- `plugins`: List of plugins to install (optional) - can be comma-separated or newline-separated
 
 **Outputs:**
 - `cache-hit`: Whether cache was restored (true/false)
 - `version`: Installed Claude Code version
 - `claude-path`: Absolute path to claude executable
+- `marketplaces_added`: Number of marketplaces added or updated
+- `plugins_installed`: Comma-separated list of successfully installed plugins
 
 **Installation Paths:**
 - Binary: `~/.local/bin/claude`
@@ -73,6 +79,16 @@ Implemented in `src/cache.ts` with `@actions/cache`.
 3. **Cache save** (`src/cache.ts`): Save to cache if fresh install
 4. **PATH setup** (`src/utils.ts`): Add `~/.local/bin` to PATH
 5. **Verify** (`src/utils.ts`): Run `claude --version` and output results
+6. **Plugin marketplaces** (`src/plugins.ts`): If `marketplaces` provided:
+   - Parse comma-separated or newline-separated marketplace list
+   - For each marketplace:
+     - Check if already installed (GitHub repos only)
+     - Add or update via `claude plugin marketplace add/update`
+   - Fail entire action if any marketplace operation fails
+7. **Plugin installation** (`src/plugins.ts`): If `plugins` provided:
+   - Parse comma-separated or newline-separated plugin list
+   - Install each plugin via `claude plugin install`
+   - Fail entire action if any plugin installation fails
 
 ## Development
 
@@ -131,7 +147,7 @@ npm run build
 ### Adding New Features
 
 1. Write tests first (TDD)
-2. Implement in appropriate module (`installer.ts`, `cache.ts`, `utils.ts`)
+2. Implement in appropriate module (`installer.ts`, `cache.ts`, `plugins.ts`, `utils.ts`)
 3. Update `main.ts` if needed
 4. Run full test suite: `npm run test:ci`
 5. Build and commit: `npm run build && git add dist/`

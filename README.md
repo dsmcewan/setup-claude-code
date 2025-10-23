@@ -14,6 +14,7 @@ Install [Claude Code CLI](https://claude.ai/code) in your GitHub Actions workflo
 - 🧪 **Tested**: Comprehensive unit and integration tests
 - 📦 **TypeScript**: Type-safe, maintainable codebase
 - 🚀 **Node 24**: Uses the latest Node.js runtime
+- 🔌 **Plugins**: Install marketplace and plugins in one step
 
 ## Usage
 
@@ -41,7 +42,7 @@ jobs:
 ```yaml
 - uses: pleaseai/setup-claude-code@v1
   with:
-    version: 2.0.25  # Install specific version number
+    version: 2.0.25 # Install specific version number
 ```
 
 ### With Stable Version
@@ -49,7 +50,7 @@ jobs:
 ```yaml
 - uses: pleaseai/setup-claude-code@v1
   with:
-    version: stable  # Install stable version (recommended for production)
+    version: stable # Install stable version (recommended for production)
 ```
 
 ### Using Outputs
@@ -66,11 +67,67 @@ jobs:
     echo "Path: ${{ steps.setup-claude.outputs.claude-path }}"
 ```
 
+### Installing Plugins
+
+#### Single Marketplace with Comma-Separated Plugins
+
+```yaml
+- uses: pleaseai/setup-claude-code@v1
+  with:
+    marketplaces: chatbot-pf/claude-plugins
+    plugins: dev-tools@passionfactory,pr-review-toolkit@passionfactory
+```
+
+#### Multiple Marketplaces with Multiline Format
+
+```yaml
+- uses: pleaseai/setup-claude-code@v1
+  with:
+    marketplaces: |
+      chatbot-pf/claude-plugins
+      company/private-plugins
+      https://gitlab.com/org/plugins.git
+    plugins: |
+      dev-tools@passionfactory
+      pr-review-toolkit@passionfactory
+      custom-plugin@company
+```
+
+#### From Various Sources
+
+```yaml
+- uses: pleaseai/setup-claude-code@v1
+  with:
+    marketplaces: |
+      owner/repo
+      https://gitlab.com/company/plugins.git
+      https://url.of/marketplace.json
+      ./local/marketplace
+    plugins: plugin1,plugin2,plugin3
+```
+
+#### Note on Marketplaces
+
+**Important**: Claude Code CLI does not have a default marketplace. You must add at least one marketplace before installing plugins. The `marketplaces` input is required if you want to use the `plugins` input.
+
+Example with marketplace and plugins together:
+
+```yaml
+- uses: pleaseai/setup-claude-code@v1
+  with:
+    marketplaces: chatbot-pf/claude-plugins
+    plugins: |
+      dev-tools@passionfactory
+      pr-review-toolkit@passionfactory
+```
+
 ## Inputs
 
 | Input | Description | Required | Default |
 |-------|-------------|----------|---------|
 | `version` | Claude Code version to install. Options: `stable` (recommended), `latest`, or specific version number (e.g., `2.0.25`) | No | `latest` |
+| `marketplaces` | Plugin marketplace sources. Supports: GitHub (`owner/repo`), Git URL, local path, or remote URL. Can be comma-separated or newline-separated (with `\|`) for multiple marketplaces. **Required if installing plugins.** | No | - |
+| `plugins` | List of plugins to install. Can be comma-separated or newline-separated (with `\|`). **Requires `marketplaces` to be specified.** | No | - |
 
 ## Outputs
 
@@ -79,6 +136,8 @@ jobs:
 | `cache-hit` | Whether cache was restored (`true` or `false`) |
 | `version` | Installed Claude Code version |
 | `claude-path` | Absolute path to claude executable |
+| `marketplaces_added` | Number of marketplaces added or updated |
+| `plugins_installed` | Comma-separated list of successfully installed plugins |
 
 ## Caching
 

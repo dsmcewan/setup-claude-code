@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        version: [stable, latest, '2.0.25']
+        version: [stable, latest, 2.0.25]
 
     steps:
       - name: Checkout
@@ -24,6 +24,12 @@ jobs:
         id: setup-claude
         with:
           version: ${{ matrix.version }}
+          marketplaces: | 
+            anthropics/claude-code
+            https://github.com/pleaseai/claude-code-plugins.git
+          plugins: |
+            agent-sdk-dev@claude-code-plugins
+            spec-kit@pleaseai
 
       - name: Verify installation
         run: |

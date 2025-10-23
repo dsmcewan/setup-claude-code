@@ -1,12 +1,15 @@
 import * as core from '@actions/core'
 import { restoreCache, saveCache } from './cache'
 import { installClaudeCode } from './installer'
+import { addOrUpdateMarketplaces, installPlugins } from './plugins'
 import { addToPath, getClaudePaths, verifyInstallation } from './utils'
 
 async function run(): Promise<void> {
   try {
     // Get inputs
     const version = core.getInput('version') || 'latest'
+    const marketplacesInput = core.getInput('marketplaces')
+    const pluginList = core.getInput('plugins')
 
     core.info(`Setting up Claude Code version: ${version}`)
 
@@ -36,7 +39,25 @@ async function run(): Promise<void> {
     core.setOutput('version', installedVersion)
     core.setOutput('claude-path', claudePath)
 
-    core.info('🎉 Claude Code setup completed successfully!')
+    core.info('✅ Claude Code setup completed successfully!')
+
+    // Handle plugin marketplace and installation
+    if (marketplacesInput) {
+      core.info('')
+      const addedCount = await addOrUpdateMarketplaces(marketplacesInput)
+      core.setOutput('marketplaces_added', addedCount.toString())
+    }
+
+    if (pluginList) {
+      core.info('')
+      const installedPlugins = await installPlugins(pluginList)
+      core.setOutput('plugins_installed', installedPlugins.join(','))
+    }
+
+    if (marketplacesInput || pluginList) {
+      core.info('')
+      core.info('🎉 Plugin setup completed successfully!')
+    }
   }
   catch (error) {
     if (error instanceof Error) {
