@@ -28,3 +28,21 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+      - name: Create or update major version tag
+        if: steps.release.outputs.release_created == 'true'
+        run: |
+          TAG_NAME="${{ steps.release.outputs.tag_name }}"
+          MAJOR_VERSION=$(echo "$TAG_NAME" | sed -E 's/^v?([0-9]+)\..*/v\1/')
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Delete existing major version tag if it exists
+          git push origin ":refs/tags/$MAJOR_VERSION" || true
+
+          # Create and push new major version tag
+          git tag -fa "$MAJOR_VERSION" -m "Update $MAJOR_VERSION to $TAG_NAME"
+          git push origin "$MAJOR_VERSION" --force
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
