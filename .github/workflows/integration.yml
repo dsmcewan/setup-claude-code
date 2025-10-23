@@ -1,0 +1,40 @@
+name: Integration Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-action:
+    name: Test action on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Test action with latest version
+        uses: ./
+        id: setup-latest
+        with:
+          version: 'latest'
+
+      - name: Verify installation
+        run: |
+          echo "Cache hit: ${{ steps.setup-latest.outputs.cache-hit }}"
+          echo "Version: ${{ steps.setup-latest.outputs.version }}"
+          echo "Path: ${{ steps.setup-latest.outputs.claude-path }}"
+
+          # Verify claude command works
+          if ! command -v claude &> /dev/null; then
+            echo "❌ Claude Code not found in PATH"
+            exit 1
+          fi
+
+          claude --version
+          echo "✅ Claude Code is working!"

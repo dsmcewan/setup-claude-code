@@ -1,0 +1,51 @@
+import * as core from '@actions/core'
+import { restoreCache, saveCache } from './cache'
+import { installClaudeCode } from './installer'
+import { addToPath, getClaudePaths, verifyInstallation } from './utils'
+
+async function run(): Promise<void> {
+  try {
+    // Get inputs
+    const version = core.getInput('version') || 'latest'
+
+    core.info(`Setting up Claude Code version: ${version}`)
+
+    // Try to restore from cache
+    const cacheHit = await restoreCache({ version })
+    core.setOutput('cache-hit', cacheHit ? 'true' : 'false')
+
+    // Install if cache miss
+    if (!cacheHit) {
+      await installClaudeCode({ version })
+
+      // Save to cache
+      await saveCache({ version })
+    }
+    else {
+      core.info('Using cached Claude Code installation')
+    }
+
+    // Add to PATH
+    const paths = getClaudePaths()
+    await addToPath(paths.bin)
+
+    // Verify installation
+    const { version: installedVersion, path: claudePath } = await verifyInstallation()
+
+    // Set outputs
+    core.setOutput('version', installedVersion)
+    core.setOutput('claude-path', claudePath)
+
+    core.info('🎉 Claude Code setup completed successfully!')
+  }
+  catch (error) {
+    if (error instanceof Error) {
+      core.setFailed(error.message)
+    }
+    else {
+      core.setFailed(String(error))
+    }
+  }
+}
+
+run()
