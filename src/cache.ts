@@ -1,6 +1,6 @@
+import * as os from 'node:os'
 import * as cache from '@actions/cache'
 import * as core from '@actions/core'
-import * as os from 'node:os'
 import { getClaudePaths, getCurrentDate } from './utils'
 
 export interface CacheOptions {

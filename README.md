@@ -29,7 +29,7 @@ jobs:
 
       - uses: amondnet/setup-claude-code@v1
         with:
-          version: 'latest'
+          version: latest
 
       - run: claude --version
 ```
@@ -39,7 +39,7 @@ jobs:
 ```yaml
 - uses: amondnet/setup-claude-code@v1
   with:
-    version: '2.0.19'
+    version: 2.0.19
 ```
 
 ### Using Outputs
@@ -48,7 +48,7 @@ jobs:
 - uses: amondnet/setup-claude-code@v1
   id: setup-claude
   with:
-    version: 'latest'
+    version: latest
 
 - run: |
     echo "Cache hit: ${{ steps.setup-claude.outputs.cache-hit }}"

@@ -2,6 +2,11 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+@docs/STANDARDS.md
+@docs/TDD.md
+@docs/TESTING.md
+@docs/commit-convention.md
+
 ## Project Overview
 
 This is a GitHub Action (`setup-claude-code`) that installs Claude Code CLI with GitHub Actions cache support. Built with TypeScript and Node.js 24, it provides a testable, maintainable alternative to shell-based actions.

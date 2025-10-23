@@ -1,7 +1,8 @@
-import * as core from '@actions/core'
-import * as exec from '@actions/exec'
+import * as fs from 'node:fs'
 import * as os from 'node:os'
 import * as path from 'node:path'
+import * as core from '@actions/core'
+import * as exec from '@actions/exec'
 
 export interface Platform {
   os: string
@@ -34,17 +35,14 @@ export function getPlatform(): Platform {
   }
 
   // Map architecture
-  switch (archType) {
-    case 'x64':
-    case 'amd64':
-      detectedArch = 'x64'
-      break
-    case 'arm64':
-    case 'aarch64':
-      detectedArch = 'arm64'
-      break
-    default:
-      throw new Error(`Unsupported architecture: ${archType}`)
+  if (archType === 'x64') {
+    detectedArch = 'x64'
+  }
+  else if (archType === 'arm64') {
+    detectedArch = 'arm64'
+  }
+  else {
+    throw new Error(`Unsupported architecture: ${archType}`)
   }
 
   // Check for musl on Linux
@@ -66,8 +64,8 @@ export function getPlatform(): Platform {
 function isMusl(): boolean {
   try {
     const isMuslPath
-      = require('node:fs').existsSync('/lib/libc.musl-x86_64.so.1')
-      || require('node:fs').existsSync('/lib/libc.musl-aarch64.so.1')
+      = fs.existsSync('/lib/libc.musl-x86_64.so.1')
+        || fs.existsSync('/lib/libc.musl-aarch64.so.1')
 
     return isMuslPath
   }
@@ -111,7 +109,6 @@ export async function verifyInstallation(): Promise<{ version: string, path: str
     const paths = getClaudePaths()
 
     // Check if executable exists
-    const fs = require('node:fs')
     if (!fs.existsSync(paths.executable)) {
       throw new Error('Claude Code executable not found')
     }

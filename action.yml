@@ -1,24 +1,23 @@
-name: "Install Claude Code"
-description: "Install Claude Code CLI with GitHub Actions cache support"
+name: Install Claude Code
+description: Install Claude Code CLI with GitHub Actions cache support
 branding:
-  icon: "terminal"
-  color: "orange"
+  icon: terminal
+  color: orange
 
 inputs:
   version:
     description: 'Claude Code version to install (e.g., "2.0.19" or "latest")'
     required: false
-    default: 'latest'
+    default: latest
 
 outputs:
   cache-hit:
-    description: 'Whether cache was restored (true/false)'
+    description: Whether cache was restored (true/false)
   version:
-    description: 'Installed Claude Code version'
+    description: Installed Claude Code version
   claude-path:
-    description: 'Absolute path to claude executable'
+    description: Absolute path to claude executable
 
 runs:
-  using: "node24"
-  main: "dist/index.js"
-
+  using: node24
+  main: dist/index.js

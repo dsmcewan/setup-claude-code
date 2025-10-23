@@ -1,9 +1,8 @@
+import * as crypto from 'node:crypto'
+import * as fs from 'node:fs'
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 import * as tc from '@actions/tool-cache'
-import * as fs from 'node:fs'
-import * as path from 'node:path'
-import * as crypto from 'node:crypto'
 import { getPlatform } from './utils'
 
 const GCS_BUCKET = 'https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases'

@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
 import * as os from 'node:os'
+import { describe, expect, it } from 'vitest'
 import { getCacheKey, getRestoreKeys } from '../src/cache'
 
 describe('cache', () => {

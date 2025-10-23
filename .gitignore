@@ -2,7 +2,7 @@
 node_modules/
 
 # Build output
-dist/
+# Note: dist/ is NOT ignored - it must be committed for GitHub Actions
 *.tsbuildinfo
 
 # Test coverage

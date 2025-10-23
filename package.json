@@ -1,8 +1,16 @@
 {
   "name": "setup-claude-code",
-  "version": "1.0.0",
-  "description": "Install Claude Code CLI with GitHub Actions cache support",
   "type": "module",
+  "version": "0.1.0",
+  "description": "Install Claude Code CLI with GitHub Actions cache support",
+  "author": "Minsu Lee",
+  "license": "MIT",
+  "keywords": [
+    "github-actions",
+    "claude-code",
+    "cli",
+    "setup"
+  ],
   "main": "dist/index.js",
   "scripts": {
     "build": "ncc build src/main.ts -o dist --source-map --license licenses.txt",
@@ -13,14 +21,6 @@
     "typecheck": "tsc --noEmit",
     "prepare": "npm run build"
   },
-  "keywords": [
-    "github-actions",
-    "claude-code",
-    "cli",
-    "setup"
-  ],
-  "author": "Minsu Lee",
-  "license": "MIT",
   "dependencies": {
     "@actions/cache": "^3.2.4",
     "@actions/core": "^1.11.1",

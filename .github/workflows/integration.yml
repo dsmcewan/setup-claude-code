@@ -22,7 +22,7 @@ jobs:
         uses: ./
         id: setup-latest
         with:
-          version: 'latest'
+          version: latest
 
       - name: Verify installation
         run: |
