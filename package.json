@@ -18,8 +18,7 @@
     "test:ci": "vitest run --coverage",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "typecheck": "tsc --noEmit",
-    "prepare": "husky"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@actions/cache": "^3.2.4",
