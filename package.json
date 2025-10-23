@@ -1,5 +1,5 @@
 {
-  "name": "setup-claude-code",
+  "name": "@pleaseai/setup-claude-code",
   "type": "module",
   "version": "0.1.0",
   "description": "Install Claude Code CLI with GitHub Actions cache support",
