@@ -77775,6 +77775,84 @@ async function runInstaller(binaryPath, target) {
 
 
 /**
+ * Security constants for input validation
+ */
+const MAX_PLUGIN_NAME_LENGTH = 512;
+const PLUGIN_NAME_PATTERN = /^[@\w.\-/]+$/;
+/**
+ * Validate plugin name to prevent injection attacks
+ * Based on Anthropic's security validation from claude-code-action
+ * @see https://github.com/anthropics/claude-code-action/commit/d4c0979
+ *
+ * Security measures:
+ * - Unicode normalization (NFC) to prevent homoglyph attacks
+ * - Path traversal detection (basic ../ and ..\ patterns)
+ * - Length limit (512 characters)
+ * - Character whitelist (alphanumeric, @, -, _, /, .)
+ *
+ * @param pluginName - Plugin name to validate
+ * @throws Error if validation fails
+ */
+function validatePluginName(pluginName) {
+    // Normalize unicode to prevent homoglyph attacks
+    const normalized = pluginName.normalize('NFC');
+    // Check for path traversal attempts
+    if (normalized.includes('../') || normalized.includes('..\\')) {
+        throw new Error(`Invalid plugin name "${pluginName}": path traversal detected`);
+    }
+    // Enforce length limit
+    if (normalized.length > MAX_PLUGIN_NAME_LENGTH) {
+        throw new Error(`Invalid plugin name "${pluginName}": exceeds maximum length of ${MAX_PLUGIN_NAME_LENGTH} characters`);
+    }
+    // Validate character set (alphanumeric, @, -, _, /, .)
+    if (!PLUGIN_NAME_PATTERN.test(normalized)) {
+        throw new Error(`Invalid plugin name "${pluginName}": contains disallowed characters. Only alphanumeric, @, -, _, /, and . are allowed`);
+    }
+}
+/**
+ * Validate marketplace source to prevent injection attacks
+ * Supports multiple formats but validates for security
+ *
+ * @param source - Marketplace source to validate
+ * @throws Error if validation fails
+ */
+function validateMarketplaceSource(source) {
+    // Normalize unicode to prevent homoglyph attacks
+    const normalized = source.normalize('NFC');
+    // Check for path traversal in non-local paths only
+    // Local paths starting with ./ or ../ are permitted (e.g., ../marketplace, ./local/path)
+    // Non-local paths embedding ../ or ..\ are rejected (e.g., malicious/../etc)
+    const isLocalPath = normalized.startsWith('./') || normalized.startsWith('../');
+    if (!isLocalPath && (normalized.includes('../') || normalized.includes('..\\'))) {
+        throw new Error(`Invalid marketplace source "${source}": path traversal detected`);
+    }
+    // Enforce length limit
+    if (normalized.length > MAX_PLUGIN_NAME_LENGTH) {
+        throw new Error(`Invalid marketplace source "${source}": exceeds maximum length of ${MAX_PLUGIN_NAME_LENGTH} characters`);
+    }
+    // Basic validation for different source types
+    const isGitHubRepo = /^[\w-]+\/[\w-]+$/.test(normalized);
+    const isGitUrl = normalized.startsWith('http://') || normalized.startsWith('https://') || normalized.endsWith('.git');
+    const isLocalPathValid = normalized.startsWith('./') || normalized.startsWith('../') || normalized.startsWith('/');
+    if (!isGitHubRepo && !isGitUrl && !isLocalPathValid) {
+        throw new Error(`Invalid marketplace source "${source}": must be GitHub (owner/repo), Git URL, or local path`);
+    }
+}
+/**
+ * Execute a claude command with unified error handling
+ * Based on Anthropic's executeClaudeCommand pattern
+ *
+ * @param args - Command arguments to pass to claude CLI
+ * @throws Error if command fails
+ */
+async function executeClaudeCommand(args) {
+    const result = await exec.getExecOutput('claude', args, {
+        silent: false,
+        ignoreReturnCode: false, // Throws for non-zero exit codes
+    });
+    return result;
+}
+/**
  * Check if a marketplace is already installed
  */
 async function isMarketplaceInstalled(repo) {
@@ -77808,12 +77886,13 @@ async function isMarketplaceInstalled(repo) {
         return null;
     }
     catch (error) {
-        core.debug(`Failed to check marketplace: ${error}`);
+        core.warning(`Failed to check if marketplace "${repo}" is installed: ${error}`);
+        core.warning('Will attempt to add marketplace anyway');
         return null;
     }
 }
 /**
- * Add or update a plugin marketplace
+ * Add or update a plugin marketplace with security validation
  * Supports multiple formats:
  * - GitHub: owner/repo
  * - Git URL: https://gitlab.com/company/plugins.git
@@ -77821,6 +77900,8 @@ async function isMarketplaceInstalled(repo) {
  * - Remote URL: https://url.of/marketplace.json
  */
 async function addOrUpdateMarketplace(source) {
+    // Validate marketplace source for security
+    validateMarketplaceSource(source);
     core.info(`📦 Checking plugin marketplace: ${source}`);
     // For GitHub repos, check if already installed
     // For other sources, we'll just try to add and handle errors
@@ -77830,26 +77911,16 @@ async function addOrUpdateMarketplace(source) {
         if (existing) {
             core.info(`  ✅ Marketplace already installed: ${existing.name}`);
             core.info('  🔄 Updating marketplace...');
-            try {
-                await exec.exec('claude', ['plugin', 'marketplace', 'update', existing.name]);
-                core.info('  ✅ Marketplace updated successfully');
-                return false; // Not newly added
-            }
-            catch (error) {
-                throw new Error(`Failed to update marketplace: ${error}`);
-            }
+            await executeClaudeCommand(['plugin', 'marketplace', 'update', existing.name]);
+            core.info('  ✅ Marketplace updated successfully');
+            return false; // Not newly added
         }
     }
     // Add new marketplace (works for all source types)
     core.info('  📦 Adding marketplace...');
-    try {
-        await exec.exec('claude', ['plugin', 'marketplace', 'add', source]);
-        core.info('  ✅ Marketplace added successfully');
-        return true; // Newly added
-    }
-    catch (error) {
-        throw new Error(`Failed to add marketplace: ${error}`);
-    }
+    await executeClaudeCommand(['plugin', 'marketplace', 'add', source]);
+    core.info('  ✅ Marketplace added successfully');
+    return true; // Newly added
 }
 /**
  * Parse a multiline or comma-separated string into array
@@ -77900,7 +77971,7 @@ async function addOrUpdateMarketplaces(marketplacesInput) {
     return addedOrUpdated;
 }
 /**
- * Install multiple plugins
+ * Install multiple plugins with security validation
  */
 async function installPlugins(pluginList) {
     const plugins = parsePluginList(pluginList);
@@ -77911,15 +77982,12 @@ async function installPlugins(pluginList) {
     core.info(`📥 Installing ${plugins.length} plugin(s)...`);
     const installed = [];
     for (const plugin of plugins) {
+        // Validate plugin name for security
+        validatePluginName(plugin);
         core.info(`  Installing: ${plugin}`);
-        try {
-            await exec.exec('claude', ['plugin', 'install', plugin]);
-            core.info('    ✅ Installed successfully');
-            installed.push(plugin);
-        }
-        catch (error) {
-            throw new Error(`Failed to install plugin "${plugin}": ${error}`);
-        }
+        await executeClaudeCommand(['plugin', 'install', plugin]);
+        core.info('    ✅ Installed successfully');
+        installed.push(plugin);
     }
     core.info(`✅ All ${installed.length} plugin(s) installed successfully`);
     return installed;
