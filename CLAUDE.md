@@ -58,12 +58,21 @@ test/
 
 ### Caching Strategy
 
-The action uses a two-tier caching approach:
+The action uses a multi-tier caching approach:
 
-1. **Versioned releases**: Cache key `claude-code-v2-{os}-{version}` (permanent)
-2. **Latest version**: Cache key `claude-code-v2-{os}-latest-{date}` (daily rotation)
+1. **Specific version**: Cache key `claude-code-{os}-{version}` (permanent)
+   - Example: `claude-code-linux-2.0.27`
+   - Restore keys: `claude-code-{os}-{version}-`, `claude-code-{os}-`
 
-Cache restore uses fallback keys to maximize cache hits across versions and dates.
+2. **Stable version**: Cache key `claude-code-{os}-{resolved-version}` (updated when stable changes)
+   - Resolves `stable` to actual version number (e.g., `2.0.31`) at runtime
+   - Example: `claude-code-linux-2.0.31`
+   - Restore keys: `claude-code-{os}-{resolved-version}`, `claude-code-{os}-`
+   - **Important**: Always installs the latest stable version, never uses cache from older stable releases
+
+3. **Latest version**: Cache key `claude-code-{os}-latest-{date}` (daily rotation)
+   - Example: `claude-code-linux-latest-2025-11-01`
+   - Restore keys: `claude-code-{os}-latest-`, `claude-code-{os}-`
 
 Implemented in `src/cache.ts` with `@actions/cache`.
 

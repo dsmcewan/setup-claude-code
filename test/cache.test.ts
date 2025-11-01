@@ -35,8 +35,8 @@ describe('cache', () => {
   })
 
   describe('getRestoreKeys', () => {
-    it('should generate restore keys', () => {
-      const keys = getRestoreKeys('1.0.0')
+    it('should generate restore keys for specific version', async () => {
+      const keys = await getRestoreKeys('1.0.0')
 
       expect(keys).toEqual([
         `claude-code-${platform}-1.0.0-`,
@@ -44,13 +44,26 @@ describe('cache', () => {
       ])
     })
 
-    it('should generate restore keys for latest', () => {
-      const keys = getRestoreKeys('latest')
+    it('should generate restore keys for latest version', async () => {
+      const keys = await getRestoreKeys('latest')
 
       expect(keys).toEqual([
         `claude-code-${platform}-latest-`,
         `claude-code-${platform}-`,
       ])
+    })
+
+    it('should generate restore keys for stable version with resolved version', async () => {
+      // Mock fetchStableVersion to return a specific version
+      vi.spyOn(installer, 'fetchStableVersion').mockResolvedValue('2.0.31')
+
+      const keys = await getRestoreKeys('stable')
+
+      expect(keys).toEqual([
+        `claude-code-${platform}-2.0.31`,
+        `claude-code-${platform}-`,
+      ])
+      expect(installer.fetchStableVersion).toHaveBeenCalledOnce()
     })
   })
 })

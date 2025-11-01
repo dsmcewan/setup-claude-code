@@ -84114,8 +84114,17 @@ async function getCacheKey(version) {
 /**
  * Generate cache restore keys (fallback keys)
  */
-function getRestoreKeys(version) {
+async function getRestoreKeys(version) {
     const platform = external_node_os_.platform();
+    // For 'stable' version, use the actual resolved version as prefix
+    // This prevents matching older stable versions
+    if (version === 'stable') {
+        const resolvedVersion = await fetchStableVersion();
+        return [
+            `claude-code-${platform}-${resolvedVersion}`,
+            `claude-code-${platform}-`,
+        ];
+    }
     return [
         `claude-code-${platform}-${version}-`,
         `claude-code-${platform}-`,
@@ -84135,7 +84144,7 @@ async function restoreCache(options) {
     const { version } = options;
     const cachePaths = getCachePaths();
     const primaryKey = await getCacheKey(version);
-    const restoreKeys = getRestoreKeys(version);
+    const restoreKeys = await getRestoreKeys(version);
     core.info(`Cache primary key: ${primaryKey}`);
     core.debug(`Cache restore keys: ${restoreKeys.join(', ')}`);
     core.debug(`Cache paths: ${cachePaths.join(', ')}`);
