@@ -53,15 +53,16 @@ describe('cache', () => {
       ])
     })
 
-    it('should generate restore keys for stable version with resolved version', async () => {
+    it('should generate restore keys for stable version with only exact version match', async () => {
       // Mock fetchStableVersion to return a specific version
       vi.spyOn(installer, 'fetchStableVersion').mockResolvedValue('2.0.31')
 
       const keys = await getRestoreKeys('stable')
 
+      // stable version should NOT have fallback key to prevent matching older versions
+      // Only exact version match should be allowed
       expect(keys).toEqual([
         `claude-code-${platform}-2.0.31`,
-        `claude-code-${platform}-`,
       ])
       expect(installer.fetchStableVersion).toHaveBeenCalledOnce()
     })

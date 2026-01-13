@@ -64,10 +64,10 @@ The action uses a multi-tier caching approach:
    - Example: `claude-code-linux-2.0.27`
    - Restore keys: `claude-code-{os}-{version}-`, `claude-code-{os}-`
 
-2. **Stable version**: Cache key `claude-code-{os}-{resolved-version}` (updated when stable changes)
+2. **Stable version**: Cache key `claude-code-{os}-{resolved-version}` (exact match only)
    - Resolves `stable` to actual version number (e.g., `2.0.31`) at runtime
    - Example: `claude-code-linux-2.0.31`
-   - Restore keys: `claude-code-{os}-{resolved-version}`, `claude-code-{os}-`
+   - Restore keys: Only exact version match (no fallback keys)
    - **Important**: Always installs the latest stable version, never uses cache from older stable releases
 
 3. **Latest version**: Cache key `claude-code-{os}-latest-{date}` (daily rotation)

@@ -84116,13 +84116,12 @@ async function getCacheKey(version) {
  */
 async function getRestoreKeys(version) {
     const platform = external_node_os_.platform();
-    // For 'stable' version, use the actual resolved version as prefix
-    // This prevents matching older stable versions
+    // For 'stable' version, only allow exact version match
+    // No fallback key to prevent restoring older cached versions
     if (version === 'stable') {
         const resolvedVersion = await fetchStableVersion();
         return [
             `claude-code-${platform}-${resolvedVersion}`,
-            `claude-code-${platform}-`,
         ];
     }
     return [

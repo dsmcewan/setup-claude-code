@@ -34,13 +34,12 @@ export async function getCacheKey(version: string): Promise<string> {
 export async function getRestoreKeys(version: string): Promise<string[]> {
   const platform = os.platform()
 
-  // For 'stable' version, use the actual resolved version as prefix
-  // This prevents matching older stable versions
+  // For 'stable' version, only allow exact version match
+  // No fallback key to prevent restoring older cached versions
   if (version === 'stable') {
     const resolvedVersion = await fetchStableVersion()
     return [
       `claude-code-${platform}-${resolvedVersion}`,
-      `claude-code-${platform}-`,
     ]
   }
 
