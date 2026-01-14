@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.4](https://github.com/pleaseai/setup-claude-code/compare/v1.1.3...v1.1.4) (2026-01-14)
+
+
+### Bug Fixes
+
+* 프라이빗 마켓플레이스 클론 시 GITHUB_TOKEN 환경 변수 전달 ([#11](https://github.com/pleaseai/setup-claude-code/issues/11)) ([3bc741c](https://github.com/pleaseai/setup-claude-code/commit/3bc741c9b2348e279258bf25d1e7873669e18d45)), closes [#10](https://github.com/pleaseai/setup-claude-code/issues/10)
+
 ## [1.1.3](https://github.com/pleaseai/setup-claude-code/compare/v1.1.2...v1.1.3) (2026-01-13)
 
 
