@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import { restoreCache, saveCache } from './cache'
 import { installClaudeCode } from './installer'
-import { addOrUpdateMarketplaces, installPlugins } from './plugins'
+import { addOrUpdateMarketplaces, installPlugins, setGitHubToken } from './plugins'
 import { addToPath, getClaudePaths, setupGitCredentials, verifyInstallation } from './utils'
 
 async function run(): Promise<void> {
@@ -47,6 +47,9 @@ async function run(): Promise<void> {
     if ((marketplacesInput || pluginList) && githubToken) {
       core.info('')
       await setupGitCredentials(githubToken)
+
+      // Set GitHub token for claude CLI commands (for private marketplace/plugin repos)
+      setGitHubToken(githubToken)
     }
 
     // Handle plugin marketplace and installation
