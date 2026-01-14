@@ -360,6 +360,78 @@ owner3/repo3`
     })
   })
 
+  describe('setGitHubToken', () => {
+    beforeEach(() => {
+      vi.clearAllMocks()
+    })
+
+    it('should store token for use in executeClaudeCommand', async () => {
+      // Import the function dynamically to test module state
+      const { setGitHubToken, addOrUpdateMarketplace } = await import('../src/plugins')
+
+      const execSpy = vi.spyOn(exec, 'getExecOutput')
+        .mockResolvedValueOnce({
+          exitCode: 0,
+          stdout: '',
+          stderr: '',
+        })
+        .mockResolvedValueOnce({
+          exitCode: 0,
+          stdout: 'Added successfully',
+          stderr: '',
+        })
+
+      // Set the token
+      setGitHubToken('test-token-123')
+
+      // Execute command that should use the token
+      await addOrUpdateMarketplace('owner/repo')
+
+      // Verify GITHUB_TOKEN was passed in env
+      expect(execSpy).toHaveBeenCalledWith(
+        'claude',
+        ['plugin', 'marketplace', 'add', 'owner/repo'],
+        expect.objectContaining({
+          env: expect.objectContaining({
+            GITHUB_TOKEN: 'test-token-123',
+          }),
+        }),
+      )
+
+      execSpy.mockRestore()
+    })
+
+    it('should not set GITHUB_TOKEN env when token is not provided', async () => {
+      const { clearGitHubToken, addOrUpdateMarketplace } = await import('../src/plugins')
+
+      const execSpy = vi.spyOn(exec, 'getExecOutput')
+        .mockResolvedValueOnce({
+          exitCode: 0,
+          stdout: '',
+          stderr: '',
+        })
+        .mockResolvedValueOnce({
+          exitCode: 0,
+          stdout: 'Added successfully',
+          stderr: '',
+        })
+
+      // Clear any existing token
+      clearGitHubToken()
+
+      await addOrUpdateMarketplace('owner/repo')
+
+      // Verify env is passed but without GITHUB_TOKEN override
+      const callArgs = execSpy.mock.calls[1]
+      const options = callArgs?.[2] as { env?: Record<string, string> }
+
+      // Should not have GITHUB_TOKEN set explicitly (will use inherited env)
+      expect(options?.env?.GITHUB_TOKEN).toBeUndefined()
+
+      execSpy.mockRestore()
+    })
+  })
+
   describe('addOrUpdateMarketplace integration', () => {
     beforeEach(() => {
       vi.clearAllMocks()

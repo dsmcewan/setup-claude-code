@@ -1,5 +1,26 @@
+import process from 'node:process'
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
+
+/**
+ * Module-level GitHub token for authentication with private repositories
+ */
+let githubToken: string | undefined
+
+/**
+ * Set the GitHub token for use in claude CLI commands
+ * This token will be passed as GITHUB_TOKEN environment variable
+ */
+export function setGitHubToken(token: string): void {
+  githubToken = token
+}
+
+/**
+ * Clear the GitHub token
+ */
+export function clearGitHubToken(): void {
+  githubToken = undefined
+}
 
 export interface MarketplaceInfo {
   name: string
@@ -88,9 +109,15 @@ export function validateMarketplaceSource(source: string): void {
  * @throws Error if command fails
  */
 async function executeClaudeCommand(args: string[]): Promise<exec.ExecOutput> {
+  // Build environment with GITHUB_TOKEN if available
+  const env = githubToken
+    ? { ...process.env, GITHUB_TOKEN: githubToken }
+    : undefined
+
   const result = await exec.getExecOutput('claude', args, {
     silent: false,
     ignoreReturnCode: false, // Throws for non-zero exit codes
+    env,
   })
 
   return result

@@ -83803,6 +83803,35 @@ module.exports = /*#__PURE__*/JSON.parse('{"name":"@actions/cache","version":"4.
 /******/ }
 /******/ 
 /************************************************************************/
+/******/ /* webpack/runtime/compat get default export */
+/******/ (() => {
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__nccwpck_require__.n = (module) => {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			() => (module['default']) :
+/******/ 			() => (module);
+/******/ 		__nccwpck_require__.d(getter, { a: getter });
+/******/ 		return getter;
+/******/ 	};
+/******/ })();
+/******/ 
+/******/ /* webpack/runtime/define property getters */
+/******/ (() => {
+/******/ 	// define getter functions for harmony exports
+/******/ 	__nccwpck_require__.d = (exports, definition) => {
+/******/ 		for(var key in definition) {
+/******/ 			if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
+/******/ 				Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 			}
+/******/ 		}
+/******/ 	};
+/******/ })();
+/******/ 
+/******/ /* webpack/runtime/hasOwnProperty shorthand */
+/******/ (() => {
+/******/ 	__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ })();
+/******/ 
 /******/ /* webpack/runtime/compat */
 /******/ 
 /******/ if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = new URL('.', import.meta.url).pathname.slice(import.meta.url.match(/^file:\/\/\/\w:/) ? 1 : 0, -1) + "/";
@@ -84182,9 +84211,30 @@ async function saveCache(options) {
     }
 }
 
+// EXTERNAL MODULE: external "node:process"
+var external_node_process_ = __nccwpck_require__(1708);
+var external_node_process_default = /*#__PURE__*/__nccwpck_require__.n(external_node_process_);
 ;// CONCATENATED MODULE: ./src/plugins.ts
 
 
+
+/**
+ * Module-level GitHub token for authentication with private repositories
+ */
+let githubToken;
+/**
+ * Set the GitHub token for use in claude CLI commands
+ * This token will be passed as GITHUB_TOKEN environment variable
+ */
+function setGitHubToken(token) {
+    githubToken = token;
+}
+/**
+ * Clear the GitHub token
+ */
+function clearGitHubToken() {
+    githubToken = undefined;
+}
 /**
  * Security constants for input validation
  */
@@ -84257,9 +84307,14 @@ function validateMarketplaceSource(source) {
  * @throws Error if command fails
  */
 async function executeClaudeCommand(args) {
+    // Build environment with GITHUB_TOKEN if available
+    const env = githubToken
+        ? { ...(external_node_process_default()).env, GITHUB_TOKEN: githubToken }
+        : undefined;
     const result = await exec.getExecOutput('claude', args, {
         silent: false,
         ignoreReturnCode: false, // Throws for non-zero exit codes
+        env,
     });
     return result;
 }
@@ -84444,6 +84499,8 @@ async function run() {
         if ((marketplacesInput || pluginList) && githubToken) {
             core.info('');
             await setupGitCredentials(githubToken);
+            // Set GitHub token for claude CLI commands (for private marketplace/plugin repos)
+            setGitHubToken(githubToken);
         }
         // Handle plugin marketplace and installation
         if (marketplacesInput) {
